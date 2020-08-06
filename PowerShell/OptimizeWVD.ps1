@@ -1,5 +1,5 @@
-<#Author       : Dean Cefola
-# Creation Date: 07-09-2020
+<#Author       : Thanks to Dean Cefola
+# Creation Date: 08-06-2020
 # Usage        : Windows Virtual Desktop Optimization Script
 # All code that this script executes is created and provided by THE VDI GUYS
 # You can download the code here  --  https://github.com/The-Virtual-Desktop-Team/Virtual-Desktop-Optimization-Tool
@@ -7,7 +7,7 @@
 # Date                         Version      Changes
 #------------------------------------------------------------------------
 # 07/09/2020                     1.0        Intial Version
-#
+# 08/06/2020                     1.1        Changed version
 
 #*********************************************************************************
 #
@@ -19,8 +19,8 @@
 ################################
 New-Item -Path C:\ -Name Optimize -ItemType Directory -ErrorAction SilentlyContinue
 $LocalPath = "C:\Optimize\"
-$WVDOptimizeURL = 'https://github.com/evdp88/wvd/WVD_optimization/archive/master.zip'
-$WVDOptimizeInstaller = "WVD_optimization.zip"
+$WVDOptimizeURL = 'https://github.com/evdp88/wvd/archive/WVD-optimize-tool.zip'
+$WVDOptimizeInstaller = "WVD-optimize-tool.zip"
 Invoke-WebRequest `
     -Uri $WVDOptimizeURL `
     -OutFile "$Localpath$WVDOptimizeInstaller"
@@ -30,11 +30,11 @@ Invoke-WebRequest `
 #    Prep for WVD Optimize    #
 ###############################
 Expand-Archive `
-    -LiteralPath "C:\Optimize\WVD_optimization.zip" `
+    -LiteralPath "C:\Optimize\WVD-optimize-tool.zip" `
     -DestinationPath "$Localpath" `
     -Force `
     -Verbose
-Set-Location -Path C:\Optimize\Virtual-Desktop-Optimization-Tool-master
+Set-Location -Path C:\Optimize\wvd-WVD-optimize-tool
 
 
 #################################
