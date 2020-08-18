@@ -19,6 +19,7 @@
 # 10/16/2019                     5.0        Add Windows 7 Support
 # 04/10/2020                     5.1        changed FSLogix download URI
 # 07/28/2020                     5.2        Removed FSLogix and WVD agent resources
+# 08/18/2020                     5.3        Add WVD agent resources
 #
 #*********************************************************************************
 #
@@ -39,32 +40,83 @@ Param (
 ######################
 #    WVD Variables   #
 ######################
-$Localpath               = "c:\temp\wvd\"
+$LocalWVDpath            = "c:\temp\wvd\"
+$WVDBootURI              = 'https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RWrxrH'
+$WVDAgentURI             = 'https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RWrmXv'
+$WVDAgentInstaller       = 'WVD-Agent.msi'
+$WVDBootInstaller        = 'WVD-Bootloader.msi'
 $Win7x64_UpdateURI       = 'https://download.microsoft.com/download/A/F/5/AF5C565C-9771-4BFB-973B-4094C1F58646/Windows6.1-KB2592687-x64.msu'                                        
 $Win7x64_WMI5URI         = 'https://download.microsoft.com/download/6/F/5/6F5FF66C-6775-42B0-86C4-47D41F2DA187/Win7AndW2K8R2-KB3191566-x64.zip'
 $Win7x64_UpdateInstaller = 'Win7-KB2592687-x64.msu'
 $Win7x64_WMI5Installer   = 'Win7-KB3191566-WMI5-x64.zip'
-$Win7x64_WVDAgentURI     = 'https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RE3JZCm'
+$Win7x64_WVDAgent        = 'https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RE3JZCm'
 $Win7x64_WVDBootMgrURI   = 'https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RE3K2e3'
 
 
 ####################################
 #    Test/Create Temp Directory    #
 ####################################
-if((Test-Path $Localpath) -eq $false) {
+if((Test-Path c:\temp) -eq $false) {
+    Add-Content -LiteralPath C:\New-WVDSessionHost.log "Create C:\temp Directory"
     Write-Host `
         -ForegroundColor Cyan `
         -BackgroundColor Black `
         "creating temp directory"
-    New-Item -Path $Localpath -ItemType Directory
+    New-Item -Path c:\temp -ItemType Directory
 }
 else {
+    Add-Content -LiteralPath C:\New-WVDSessionHost.log "C:\temp Already Exists"
     Write-Host `
         -ForegroundColor Yellow `
         -BackgroundColor Black `
         "temp directory already exists"
 }
+if((Test-Path $LocalWVDpath) -eq $false) {
+    Add-Content -LiteralPath C:\New-WVDSessionHost.log "Create C:\temp\WVD Directory"
+    Write-Host `
+        -ForegroundColor Cyan `
+        -BackgroundColor Black `
+        "creating c:\temp\wvd directory"
+    New-Item -Path $LocalWVDpath -ItemType Directory
+}
+else {
+    Add-Content -LiteralPath C:\New-WVDSessionHost.log "C:\temp\WVD Already Exists"
+    Write-Host `
+        -ForegroundColor Yellow `
+        -BackgroundColor Black `
+        "c:\temp\wvd directory already exists"
+}
+New-Item -Path c:\ -Name New-WVDSessionHost.log -ItemType File
+Add-Content `
+-LiteralPath C:\New-WVDSessionHost.log `
+"
+ProfilePath       = $ProfilePath
+RegistrationToken = $RegistrationToken
+Optimize          = $Optimize
+"
 
+#################################
+#    Download WVD Componants    #
+#################################
+Add-Content -LiteralPath C:\New-WVDSessionHost.log "Downloading WVD Boot Loader"
+    Invoke-WebRequest -Uri $WVDBootURI -OutFile "$LocalWVDpath$WVDBootInstaller"
+Add-Content -LiteralPath C:\New-WVDSessionHost.log "Downloading FSLogix"
+    Invoke-WebRequest -Uri $FSLogixURI -OutFile "$LocalWVDpath$FSInstaller"
+Add-Content -LiteralPath C:\New-WVDSessionHost.log "Downloading WVD Agent"
+    Invoke-WebRequest -Uri $WVDAgentURI -OutFile "$LocalWVDpath$WVDAgentInstaller"
+
+##############################
+#    Prep for WVD Install    #
+##############################
+Add-Content -LiteralPath C:\New-WVDSessionHost.log "Unzip FSLogix"
+Expand-Archive `
+    -LiteralPath "C:\temp\wvd\$FSInstaller" `
+    -DestinationPath "$LocalWVDpath\FSLogix" `
+    -Force `
+    -Verbose
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+cd $LocalWVDpath 
+Add-Content -LiteralPath C:\New-WVDSessionHost.log "UnZip FXLogix Complete"
 
 ##############################
 #    OS Specific Settings    #
@@ -138,7 +190,38 @@ Else {
     }
 }
 
-
+################################
+#    Install WVD Componants    #
+################################
+Add-Content -LiteralPath C:\New-WVDSessionHost.log "Installing WVD Bootloader"
+$bootloader_deploy_status = Start-Process `
+    -FilePath "msiexec.exe" `
+    -ArgumentList "/i $WVDBootInstaller", `
+        "/quiet", `
+        "/qn", `
+        "/norestart", `
+        "/passive", `
+        "/l* $LocalWVDpath\AgentBootLoaderInstall.txt" `
+    -Wait `
+    -Passthru
+$sts = $bootloader_deploy_status.ExitCode
+Add-Content -LiteralPath C:\New-WVDSessionHost.log "Installing WVD Bootloader Complete"
+Write-Output "Installing RDAgentBootLoader on VM Complete. Exit code=$sts`n"
+Wait-Event -Timeout 5
+Add-Content -LiteralPath C:\New-WVDSessionHost.log "Installing WVD Agent"
+Write-Output "Installing RD Infra Agent on VM $AgentInstaller`n"
+$agent_deploy_status = Start-Process `
+    -FilePath "msiexec.exe" `
+    -ArgumentList "/i $WVDAgentInstaller", `
+        "/quiet", `
+        "/qn", `
+        "/norestart", `
+        "/passive", `
+        "REGISTRATIONTOKEN=$RegistrationToken", "/l* $LocalWVDpath\AgentInstall.txt" `
+    -Wait `
+    -Passthru
+Add-Content -LiteralPath C:\New-WVDSessionHost.log "WVD Agent Install Complete"
+Wait-Event -Timeout 5
 
 #######################################
 #    FSLogix User Profile Settings    #
