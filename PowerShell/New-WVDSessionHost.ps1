@@ -56,6 +56,15 @@ $Win7x64_WVDBootMgrURI   = 'https://query.prod.cms.rt.microsoft.com/cms/api/am/b
 ####################################
 #    Test/Create Temp Directory    #
 ####################################
+New-Item -Path c:\ -Name New-WVDSessionHost.log -ItemType File
+Add-Content `
+-LiteralPath C:\New-WVDSessionHost.log `
+"
+ProfilePath       = $ProfilePath
+RegistrationToken = $RegistrationToken
+Optimize          = $Optimize
+"
+
 if((Test-Path c:\temp) -eq $false) {
     Add-Content -LiteralPath C:\New-WVDSessionHost.log "Create C:\temp Directory"
     Write-Host `
@@ -86,14 +95,7 @@ else {
         -BackgroundColor Black `
         "c:\temp\wvd directory already exists"
 }
-New-Item -Path c:\ -Name New-WVDSessionHost.log -ItemType File
-Add-Content `
--LiteralPath C:\New-WVDSessionHost.log `
-"
-ProfilePath       = $ProfilePath
-RegistrationToken = $RegistrationToken
-Optimize          = $Optimize
-"
+
 
 #################################
 #    Download WVD Componants    #
