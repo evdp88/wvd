@@ -87,7 +87,9 @@ else {
         -BackgroundColor Black `
         "c:\temp\wvd directory already exists"
 }
-New-Item -Path c:\ -Name New-WVDSessionHost.log -ItemType File
+if((Test-Path c:\New-WVDSessionHost.log) -eq $false) {
+    New-Item -Path c:\ -Name New-WVDSessionHost.log -ItemType File
+    }
 Add-Content `
 -LiteralPath C:\New-WVDSessionHost.log `
 "
