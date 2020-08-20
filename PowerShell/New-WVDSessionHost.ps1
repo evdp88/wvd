@@ -21,6 +21,7 @@
 # 07/28/2020                     5.2        Removed FSLogix and WVD agent resources
 # 08/18/2020                     5.3        Add WVD agent resources
 # 08/20/2020                     5.4        Remove remained FSLogix components and add a Test-Path for log file
+# 08/20/2020                     5.5        Add $LocalWVDpath\ before WVD bootloader and agent sources
 #
 #*********************************************************************************
 #
@@ -185,7 +186,7 @@ Else {
 Add-Content -LiteralPath C:\New-WVDSessionHost.log "Installing WVD Bootloader"
 $bootloader_deploy_status = Start-Process `
     -FilePath "msiexec.exe" `
-    -ArgumentList "/i $WVDBootInstaller", `
+    -ArgumentList "/i $LocalWVDpath\$WVDBootInstaller", `
         "/quiet", `
         "/qn", `
         "/norestart", `
@@ -201,7 +202,7 @@ Add-Content -LiteralPath C:\New-WVDSessionHost.log "Installing WVD Agent"
 Write-Output "Installing RD Infra Agent on VM $AgentInstaller`n"
 $agent_deploy_status = Start-Process `
     -FilePath "msiexec.exe" `
-    -ArgumentList "/i $WVDAgentInstaller", `
+    -ArgumentList "/i $LocalWVDpath\$WVDAgentInstaller", `
         "/quiet", `
         "/qn", `
         "/norestart", `
