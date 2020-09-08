@@ -22,6 +22,7 @@
 # 08/18/2020                     5.3        Add WVD agent resources
 # 08/20/2020                     5.4        Remove remained FSLogix components and add a Test-Path for log file
 # 08/20/2020                     5.5        Add $LocalWVDpath\ before WVD bootloader and agent sources
+# 09/08/2020                     5.6        Add FS Logix agent installation
 #
 #*********************************************************************************
 #
@@ -45,6 +46,8 @@ Param (
 $LocalWVDpath            = "c:\temp\wvd\"
 $WVDBootURI              = 'https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RWrxrH'
 $WVDAgentURI             = 'https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RWrmXv'
+$FSLogixURI              = 'https://aka.ms/fslogix_download'
+$FSInstaller             = 'FSLogixAppsSetup.zip'
 $WVDAgentInstaller       = 'WVD-Agent.msi'
 $WVDBootInstaller        = 'WVD-Bootloader.msi'
 $Win7x64_UpdateURI       = 'https://download.microsoft.com/download/A/F/5/AF5C565C-9771-4BFB-973B-4094C1F58646/Windows6.1-KB2592687-x64.msu'                                        
@@ -213,6 +216,16 @@ $agent_deploy_status = Start-Process `
 Add-Content -LiteralPath C:\New-WVDSessionHost.log "WVD Agent Install Complete"
 Wait-Event -Timeout 5
 
+#########################
+#    FSLogix Install    #
+#########################
+Add-Content -LiteralPath C:\New-WVDSessionHost.log "Installing FSLogix"
+$fslogix_deploy_status = Start-Process `
+    -FilePath "$LocalWVDpath\FSLogix\x64\Release\FSLogixAppsSetup.exe" `
+    -ArgumentList "/install /quiet" `
+    -Wait `
+    -Passthru
+    
 #######################################
 #    FSLogix User Profile Settings    #
 #######################################
