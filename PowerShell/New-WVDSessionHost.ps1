@@ -108,6 +108,8 @@ Optimize          = $Optimize
 #################################
 Add-Content -LiteralPath C:\New-WVDSessionHost.log "Downloading WVD Boot Loader"
     Invoke-WebRequest -Uri $WVDBootURI -OutFile "$LocalWVDpath$WVDBootInstaller"
+Add-Content -LiteralPath C:\New-WVDSessionHost.log "Downloading FSLogix"
+    Invoke-WebRequest -Uri $FSLogixURI -OutFile "$LocalWVDpath$FSInstaller"
 Add-Content -LiteralPath C:\New-WVDSessionHost.log "Downloading WVD Agent"
     Invoke-WebRequest -Uri $WVDAgentURI -OutFile "$LocalWVDpath$WVDAgentInstaller"
 
