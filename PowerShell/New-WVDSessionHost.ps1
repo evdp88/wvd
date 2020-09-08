@@ -114,6 +114,19 @@ Add-Content -LiteralPath C:\New-WVDSessionHost.log "Downloading WVD Agent"
     Invoke-WebRequest -Uri $WVDAgentURI -OutFile "$LocalWVDpath$WVDAgentInstaller"
 
 ##############################
+#    Prep for WVD Install    #
+##############################
+Add-Content -LiteralPath C:\New-WVDSessionHost.log "Unzip FSLogix"
+Expand-Archive `
+    -LiteralPath "C:\temp\wvd\$FSInstaller" `
+    -DestinationPath "$LocalWVDpath\FSLogix" `
+    -Force `
+    -Verbose
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+cd $LocalWVDpath 
+Add-Content -LiteralPath C:\New-WVDSessionHost.log "UnZip FXLogix Complete"
+
+##############################
 #    OS Specific Settings    #
 ##############################
 $OS = (Get-WmiObject win32_operatingsystem).name
