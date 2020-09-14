@@ -46,8 +46,8 @@ Param (
 $LocalWVDpath            = "c:\temp\wvd\"
 $WVDBootURI              = 'https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RWrxrH'
 $WVDAgentURI             = 'https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RWrmXv'
-$FSLogixURI              = 'https://aka.ms/fslogix_download'
-$FSInstaller             = 'FSLogixAppsSetup.zip'
+#$FSLogixURI              = 'https://aka.ms/fslogix_download'
+#$FSInstaller             = 'FSLogixAppsSetup.zip'
 $WVDAgentInstaller       = 'WVD-Agent.msi'
 $WVDBootInstaller        = 'WVD-Bootloader.msi'
 $Win7x64_UpdateURI       = 'https://download.microsoft.com/download/A/F/5/AF5C565C-9771-4BFB-973B-4094C1F58646/Windows6.1-KB2592687-x64.msu'                                        
@@ -108,8 +108,8 @@ Optimize          = $Optimize
 #################################
 Add-Content -LiteralPath C:\New-WVDSessionHost.log "Downloading WVD Boot Loader"
     Invoke-WebRequest -Uri $WVDBootURI -OutFile "$LocalWVDpath$WVDBootInstaller"
-Add-Content -LiteralPath C:\New-WVDSessionHost.log "Downloading FSLogix"
-    Invoke-WebRequest -Uri $FSLogixURI -OutFile "$LocalWVDpath$FSInstaller"
+#Add-Content -LiteralPath C:\New-WVDSessionHost.log "Downloading FSLogix"
+#    Invoke-WebRequest -Uri $FSLogixURI -OutFile "$LocalWVDpath$FSInstaller"
 Add-Content -LiteralPath C:\New-WVDSessionHost.log "Downloading WVD Agent"
     Invoke-WebRequest -Uri $WVDAgentURI -OutFile "$LocalWVDpath$WVDAgentInstaller"
 
@@ -234,12 +234,12 @@ Wait-Event -Timeout 5
 #########################
 #    FSLogix Install    #
 #########################
-Add-Content -LiteralPath C:\New-WVDSessionHost.log "Installing FSLogix"
-$fslogix_deploy_status = Start-Process `
-    -FilePath "$LocalWVDpath\FSLogix\x64\Release\FSLogixAppsSetup.exe" `
-    -ArgumentList "/install /quiet" `
-    -Wait `
-    -Passthru
+#Add-Content -LiteralPath C:\New-WVDSessionHost.log "Installing FSLogix"
+#$fslogix_deploy_status = Start-Process `
+#    -FilePath "$LocalWVDpath\FSLogix\x64\Release\FSLogixAppsSetup.exe" `
+#    -ArgumentList "/install /quiet" `
+#    -Wait `
+#    -Passthru
     
 #######################################
 #    FSLogix User Profile Settings    #
