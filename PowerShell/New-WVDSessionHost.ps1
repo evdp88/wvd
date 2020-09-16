@@ -23,7 +23,7 @@
 # 08/20/2020                     5.4        Remove remained FSLogix components and add a Test-Path for log file
 # 08/20/2020                     5.5        Add $LocalWVDpath\ before WVD bootloader and agent sources
 # 09/08/2020                     5.6        Add FS Logix agent installation
-# 09/16/2020                     5.7        Removed FS Logix registry key FlipFlopProfileDirectoryName
+# 09/16/2020                     5.7        Removed and changed some FS Logix registry key values
 #
 #*********************************************************************************
 #
@@ -267,28 +267,11 @@ New-ItemProperty `
     -Value $ProfilePath `
     -PropertyType MultiString `
     -Force
-<#
-New-ItemProperty `
-    -Path HKLM:\SOFTWARE\FSLogix\Profiles `
-    -Name "CCDLocations" `
-    -PropertyType "MultiString" `
-    -Value "type=smb,connectionString=$ProfilePath"
-#>
-Set-ItemProperty `
-    -Path HKLM:\Software\FSLogix\Profiles `
-    -Name "SizeInMBs" `
-    -Type "Dword" `
-    -Value "1024"
 Set-ItemProperty `
     -Path HKLM:\Software\FSLogix\Profiles `
     -Name "IsDynamic" `
     -Type "Dword" `
     -Value "1"
-Set-ItemProperty `
-    -Path HKLM:\Software\FSLogix\Profiles `
-    -Name "VolumeType" `
-    -Type String `
-    -Value "vhdx"
 Set-ItemProperty `
     -Path HKLM:\Software\FSLogix\Profiles `
     -Name "LockedRetryCount" `
@@ -304,31 +287,6 @@ Set-ItemProperty `
     -Name "ProfileType" `
     -Type "Dword" `
     -Value "3"
-Set-ItemProperty `
-    -Path HKLM:\Software\FSLogix\Profiles `
-    -Name "ConcurrentUserSessions" `
-    -Type "Dword" `
-    -Value "1"
-Set-ItemProperty `
-    -Path HKLM:\Software\FSLogix\Profiles `
-    -Name "RoamSearch" `
-    -Type "Dword" `
-    -Value "2" 
-New-ItemProperty `
-    -Path HKLM:\Software\FSLogix\Profiles\Apps `
-    -Name "RoamSearch" `
-    -Type "Dword" `
-    -Value "2"
-Set-ItemProperty `
-    -Path HKLM:\Software\FSLogix\Profiles `
-    -Name "SIDDirNamePattern" `
-    -Type String `
-    -Value "%username%%sid%"
-Set-ItemProperty `
-    -Path HKLM:\Software\FSLogix\Profiles `
-    -Name "SIDDirNameMatch" `
-    -Type String `
-    -Value "%username%%sid%" 
 New-ItemProperty `
     -Path HKLM:\SOFTWARE\FSLogix\Profiles `
     -Name "RebootOnUserLogoff" `
@@ -358,33 +316,11 @@ New-ItemProperty `
     -Value $ProfilePath `
     -PropertyType MultiString `
     -Force
-<#
-New-ItemProperty `
-    -Path HKLM:\SOFTWARE\Policies\FSLogix\ODFC `
-    -Name "CCDLocations" `
-    -PropertyType "MultiString" `
-    -Value "type=smb,connectionString=$ProfilePath"
-#>
 New-ItemProperty `
     -Path HKLM:\SOFTWARE\Policies\FSLogix\ODFC `
     -Name "Enabled" `
     -PropertyType "DWord" `
     -Value 1
-New-ItemProperty `
-    -Path HKLM:\SOFTWARE\Policies\FSLogix\ODFC `
-    -Name "FlipFlopProfileDirectoryName" `
-    -PropertyType "DWord" `
-    -Value 0
-Set-ItemProperty `
-    -Path HKLM:\SOFTWARE\Policies\FSLogix\ODFC `
-    -Name "SIDDirNamePattern" `
-    -Type String `
-    -Value "%username%%sid%"
-Set-ItemProperty `
-    -Path HKLM:\SOFTWARE\Policies\FSLogix\ODFC `
-    -Name "RoamSearch" `
-    -Type "Dword" `
-    -Value "2" 
 New-ItemProperty `
     -Path HKLM:\SOFTWARE\Policies\FSLogix\ODFC `
     -Name "IncludeOneDrive" `
