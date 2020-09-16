@@ -276,17 +276,12 @@ Set-ItemProperty `
     -Path HKLM:\Software\FSLogix\Profiles `
     -Name "LockedRetryCount" `
     -Type "Dword" `
-    -Value "12"
+    -Value "24"
 Set-ItemProperty `
     -Path HKLM:\Software\FSLogix\Profiles `
     -Name "LockedRetryInterval" `
     -Type "Dword" `
     -Value "5"
-Set-ItemProperty `
-    -Path HKLM:\Software\FSLogix\Profiles `
-    -Name "ProfileType" `
-    -Type "Dword" `
-    -Value "3"
 New-ItemProperty `
     -Path HKLM:\SOFTWARE\FSLogix\Profiles `
     -Name "RebootOnUserLogoff" `
