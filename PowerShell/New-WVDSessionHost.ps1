@@ -24,6 +24,7 @@
 # 08/20/2020                     5.5        Add $LocalWVDpath\ before WVD bootloader and agent sources
 # 09/08/2020                     5.6        Add FS Logix agent installation
 # 09/16/2020                     5.7        Removed and changed some FS Logix registry key values
+#                                           Removed complete FSLogix Office Profile Settings
 #
 #*********************************************************************************
 #
@@ -293,71 +294,6 @@ New-ItemProperty `
     -PropertyType "DWord" `
     -Value 0
 Pop-Location
-
-
-#########################################
-#    FSLogix Office Profile Settings    #
-#########################################
-Push-Location 
-Set-Location HKLM:\SOFTWARE\Policies\
-New-Item `
-    -Path .\FSLogix `
-    -Name ODFC `
-    -Value "" `
-    -Force 
-New-ItemProperty `
-    -Path HKLM:\SOFTWARE\Policies\FSLogix\ODFC `
-    -Name "VHDLocations" `
-    -Value $ProfilePath `
-    -PropertyType MultiString `
-    -Force
-New-ItemProperty `
-    -Path HKLM:\SOFTWARE\Policies\FSLogix\ODFC `
-    -Name "Enabled" `
-    -PropertyType "DWord" `
-    -Value 1
-New-ItemProperty `
-    -Path HKLM:\SOFTWARE\Policies\FSLogix\ODFC `
-    -Name "IncludeOneDrive" `
-    -PropertyType "DWord" `
-    -Value 1
-New-ItemProperty `
-    -Path HKLM:\SOFTWARE\Policies\FSLogix\ODFC `
-    -Name "IncludeOneNote" `
-    -PropertyType "DWord" `
-    -Value 1
-New-ItemProperty `
-    -Path HKLM:\SOFTWARE\Policies\FSLogix\ODFC `
-    -Name "IncludeOneNote_UWP" `
-    -PropertyType "DWord" `
-    -Value 0
-New-ItemProperty `
-    -Path HKLM:\SOFTWARE\Policies\FSLogix\ODFC `
-    -Name "IncludeOutlook" `
-    -PropertyType "DWord" `
-    -Value 1
-New-ItemProperty `
-    -Path HKLM:\SOFTWARE\Policies\FSLogix\ODFC `
-    -Name "IncludeOutlookPersonalization" `
-    -PropertyType "DWord" `
-    -Value 1
-New-ItemProperty `
-    -Path HKLM:\SOFTWARE\Policies\FSLogix\ODFC `
-    -Name "IncludeSharepoint" `
-    -PropertyType "DWord" `
-    -Value 1
-New-ItemProperty `
-    -Path HKLM:\SOFTWARE\Policies\FSLogix\ODFC `
-    -Name "IncludeSkype" `
-    -PropertyType "DWord" `
-    -Value 1
-New-ItemProperty `
-    -Path HKLM:\SOFTWARE\Policies\FSLogix\ODFC `
-    -Name "IncludeTeams" `
-    -PropertyType "DWord" `
-    -Value 1
-Pop-Location
-
 
 
 #############
