@@ -23,6 +23,7 @@
 # 08/20/2020                     5.4        Remove remained FSLogix components and add a Test-Path for log file
 # 08/20/2020                     5.5        Add $LocalWVDpath\ before WVD bootloader and agent sources
 # 09/08/2020                     5.6        Add FS Logix agent installation
+# 09/16/2020                     5.7        Removed FS Logix registry key FlipFlopProfileDirectoryName
 #
 #*********************************************************************************
 #
@@ -318,11 +319,6 @@ New-ItemProperty `
     -Name "RoamSearch" `
     -Type "Dword" `
     -Value "2"
-Set-ItemProperty `
-    -Path HKLM:\Software\FSLogix\Profiles `
-    -Name "FlipFlopProfileDirectoryName" `
-    -Type "Dword" `
-    -Value "1" 
 Set-ItemProperty `
     -Path HKLM:\Software\FSLogix\Profiles `
     -Name "SIDDirNamePattern" `
