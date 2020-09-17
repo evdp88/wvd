@@ -1,35 +1,84 @@
-<#Author       : Dean Cefola
-# Creation Date: 09-15-2019
-# Usage        : Windows Virtual Desktop Scripted Install
+<#
+.SYNOPSIS
+New-WVDSessionHost.ps1 - Finish WVD VM configuration
 
-#********************************************************************************
-# Date                         Version      Changes
-#------------------------------------------------------------------------
-# 09/15/2019                     1.0        Intial Version
-# 09/16/2019                     2.0        Add FSLogix installer
-# 09/16/2019                     2.1        Add FSLogix Reg Keys 
-# 09/16/2019                     2.2        Add Input Parameters 
-# 09/16/2019                     2.3        Add TLS 1.2 settings
-# 09/17/2019                     3.0        Chang download locations to dynamic
-# 09/17/2019                     3.1        Add code to disable IESEC for admins
-# 09/20/2019                     3.2        Add code to discover OS (Server / Client)
-# 09/20/2019                     4.0        Add code for servers to add RDS Host role
-# 10/01/2019                     4.2        Add all FSLogix Profile Container Reg entries for easier management
-# 10/07/2019                     4.3        Add FSLogix Office Container Reg entries for easier management
-# 10/16/2019                     5.0        Add Windows 7 Support
-# 04/10/2020                     5.1        changed FSLogix download URI
-# 07/28/2020                     5.2        Removed FSLogix and WVD agent resources
-# 08/18/2020                     5.3        Add WVD agent resources
-# 08/20/2020                     5.4        Remove remained FSLogix components and add a Test-Path for log file
-# 08/20/2020                     5.5        Add $LocalWVDpath\ before WVD bootloader and agent sources
-# 09/08/2020                     5.6        Add FS Logix agent installation
-# 09/16/2020                     5.7        Removed and changed some FS Logix registry key values
-#                                           Removed complete FSLogix Office Profile Settings
-#
-#*********************************************************************************
-#
+.DESCRIPTION 
+Performs the final prepartion for WVD VMs, after this script the new VMS can be used in a WVD Host Pool.
+Information required for adding to wvd is the RegistrationToken
+
+.OUTPUTS
+Results are output to screen
+
+.PARAMETER ProfilePath
+Specify if the script will show the script output on screen
+
+.PARAMETER RegistrationToken
+Specify CustomerName, used for default naming convention and naming
+
+
+.EXAMPLE
+.\New-WVDSessionHost.ps1 -ProfilePath [FS Logix Profile Path] `
+    -RegistrationToken [WVD registration token] 
+Complete WVD VM configuration, install WVD Agent, WVD Bootloader, and FS Logix + FS Logix Keys
+
+
+.LINK
+n/a
+
+.NOTES
+Written by: Erik van der Plas
+
+Find me on:
+
+* LinkedIn:	https://www.linkedin.com/in/erikvdplas/
+* Github:	https://github.com/evdp88
+
+
+License:
+
+The Sogeti License
+
+Copyright (c) 2020 Erik van der Plas
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+Change Log
+V1.0, 09/15/2019 - Initial version by Dean Cefola
+v1.1, 09/16/2019 - Add FSLogix installer
+                   Add FSLogix Reg Keys
+                   Add Input Parameters
+                   Add TLS 1.2 settings
+v1.2, 09/17/2019 - Change download locations to dynamic
+                   Add code to disable IESEC for admins
+v1.3, 10/01/2019 - Add all FSLogix Profile Container Reg entries for easier management
+v1.4, 04/10/2020 - Changed FSLogix download URI
+v1.5, 08/18/2020 - Start script changes by Sogeti/Erik van der Plas
+                   Add WVD agent resources
+v1.6, 08/20/2020 - Remove remained FSLogix components and add a Test-Path for log file
+                   Add $LocalWVDpath\ before WVD bootloader and agent sources
+v1.7, 09/08/2020 - Add FS Logix agent installation
+v1.8, 09/16/2020 - Removed and changed some FS Logix registry key values
+                   Removed complete FSLogix Office Profile Settings
+v1.9, 09/17/2020 - Install FS Logix agent only if required
+                   End script with removing temp\wvd folder
+
 #>
-
 
 ##############################
 #    WVD Script Parameters   #
@@ -48,22 +97,15 @@ Param (
 $LocalWVDpath            = "c:\temp\wvd\"
 $WVDBootURI              = 'https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RWrxrH'
 $WVDAgentURI             = 'https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RWrmXv'
-#$FSLogixURI              = 'https://aka.ms/fslogix_download'
-#$FSInstaller             = 'FSLogixAppsSetup.zip'
+$FSLogixURI              = 'https://aka.ms/fslogix_download'
+$FSInstaller             = 'FSLogixAppsSetup.zip'
 $WVDAgentInstaller       = 'WVD-Agent.msi'
 $WVDBootInstaller        = 'WVD-Bootloader.msi'
-$Win7x64_UpdateURI       = 'https://download.microsoft.com/download/A/F/5/AF5C565C-9771-4BFB-973B-4094C1F58646/Windows6.1-KB2592687-x64.msu'                                        
-$Win7x64_WMI5URI         = 'https://download.microsoft.com/download/6/F/5/6F5FF66C-6775-42B0-86C4-47D41F2DA187/Win7AndW2K8R2-KB3191566-x64.zip'
-$Win7x64_UpdateInstaller = 'Win7-KB2592687-x64.msu'
-$Win7x64_WMI5Installer   = 'Win7-KB3191566-WMI5-x64.zip'
-$Win7x64_WVDAgent        = 'https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RE3JZCm'
-$Win7x64_WVDBootMgrURI   = 'https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RE3K2e3'
 
 
 ####################################
 #    Test/Create Temp Directory    #
 ####################################
-
 if((Test-Path c:\temp) -eq $false) {
     Add-Content -LiteralPath C:\New-WVDSessionHost.log "Create C:\temp Directory"
     Write-Host `
@@ -105,18 +147,20 @@ RegistrationToken = $RegistrationToken
 Optimize          = $Optimize
 "
 
+
 #################################
 #    Download WVD Componants    #
 #################################
-Add-Content -LiteralPath C:\New-WVDSessionHost.log "Downloading WVD Boot Loader"
-    Invoke-WebRequest -Uri $WVDBootURI -OutFile "$LocalWVDpath$WVDBootInstaller"
-#Add-Content -LiteralPath C:\New-WVDSessionHost.log "Downloading FSLogix"
-#    Invoke-WebRequest -Uri $FSLogixURI -OutFile "$LocalWVDpath$FSInstaller"
 Add-Content -LiteralPath C:\New-WVDSessionHost.log "Downloading WVD Agent"
     Invoke-WebRequest -Uri $WVDAgentURI -OutFile "$LocalWVDpath$WVDAgentInstaller"
+Add-Content -LiteralPath C:\New-WVDSessionHost.log "Downloading WVD Boot Loader"
+    Invoke-WebRequest -Uri $WVDBootURI -OutFile "$LocalWVDpath$WVDBootInstaller"
+Add-Content -LiteralPath C:\New-WVDSessionHost.log "Downloading FSLogix"
+    Invoke-WebRequest -Uri $FSLogixURI -OutFile "$LocalWVDpath$FSInstaller"
+
 
 ##############################
-#    Prep for WVD Install    #
+# Prep for FS Logix Install  #
 ##############################
 Add-Content -LiteralPath C:\New-WVDSessionHost.log "Unzip FSLogix"
 Expand-Archive `
@@ -128,77 +172,6 @@ Expand-Archive `
 cd $LocalWVDpath 
 Add-Content -LiteralPath C:\New-WVDSessionHost.log "UnZip FXLogix Complete"
 
-##############################
-#    OS Specific Settings    #
-##############################
-$OS = (Get-WmiObject win32_operatingsystem).name
-If(($OS) -match 'server') {
-    write-host -ForegroundColor Cyan -BackgroundColor Black "Windows Server OS Detected"
-    If(((Get-WindowsFeature -Name RDS-RD-Server).installstate) -eq 'Installed') {
-        "Session Host Role is already installed"
-    }
-    Else {
-        "Installing Session Host Role"
-        Install-WindowsFeature `
-            -Name RDS-RD-Server `
-            -Verbose `
-            -LogPath "$Localpath\RdsServerRoleInstall.txt"
-    }
-    $AdminsKey = "SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}"
-    $UsersKey = "SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}"
-    $BaseKey = [Microsoft.Win32.RegistryKey]::OpenBaseKey("LocalMachine","Default")
-    $SubKey = $BaseKey.OpenSubkey($AdminsKey,$true)
-    $SubKey.SetValue("IsInstalled",0,[Microsoft.Win32.RegistryValueKind]::DWORD)
-    $SubKey = $BaseKey.OpenSubKey($UsersKey,$true)
-    $SubKey.SetValue("IsInstalled",0,[Microsoft.Win32.RegistryValueKind]::DWORD)    
-}
-Else {
-    write-host -ForegroundColor Cyan -BackgroundColor Black "Windows Client OS Detected"
-    if(($OS) -match 'Windows 10') {
-        write-host `
-            -ForegroundColor Yellow `
-            -BackgroundColor Black  `
-            "Windows 10 detected...skipping to next step"     
-    }    
-    else {
-        $OSArch = (Get-WmiObject win32_operatingsystem).OSArchitecture
-        If(($OSArch) -match '64-bit') {
-            write-host `
-                -ForegroundColor Magenta  `
-                -BackgroundColor Black `
-                "Windows 7 x64 detected"
-
-
-            #################################
-            #    Begin Win7x64 downloads    #
-            #################################
-            $Win7x64_WinUpdateRequest = [System.Net.WebRequest]::Create($Win7x64_UpdateURI)
-            $Win7x64_WMI5Request      = [System.Net.WebRequest]::Create($Win7x64_WMI5URI)            
-            $Win7x64_WVDAgentRequest  = [System.Net.WebRequest]::Create($Win7x64_WVDAgentURI)
-            $Win7x64_WVDBootRequest   = [System.Net.WebRequest]::Create($Win7x64_WVDBootMgrURI)
-
-
-            ################################
-            #    Begin Win7x64 Installs    #
-            ################################
-            write-host `
-                -ForegroundColor Magenta `
-                -BackgroundColor Black `
-                "...installing Update KB2592687 for x64"
-            Expand-Archive `
-                -LiteralPath "C:\temp\wvd\$Win7x64_WMI5Installer" `
-                -DestinationPath "$Localpath\Win7Wmi5x64" `
-                -Force `
-                -Verbose
-            $packageName = 'Win7AndW2K8R2-KB3191566-x64.msu'
-            $packagePath = 'C:\temp\wvd\Win7Wmi5x64'
-            $wusaExe = "$env:windir\system32\wusa.exe"
-            $wusaParameters += @("/quiet", "/promptrestart")
-            $wusaParameterString = $wusaParameters -join " "
-            & $wusaExe $wusaParameterString
-        }        
-    }
-}
 
 ################################
 #    Install WVD Componants    #
@@ -233,16 +206,25 @@ $agent_deploy_status = Start-Process `
 Add-Content -LiteralPath C:\New-WVDSessionHost.log "WVD Agent Install Complete"
 Wait-Event -Timeout 5
 
+
 #########################
 #    FSLogix Install    #
 #########################
-#Add-Content -LiteralPath C:\New-WVDSessionHost.log "Installing FSLogix"
-#$fslogix_deploy_status = Start-Process `
-#    -FilePath "$LocalWVDpath\FSLogix\x64\Release\FSLogixAppsSetup.exe" `
-#    -ArgumentList "/install /quiet" `
-#    -Wait `
-#    -Passthru
-    
+Add-Content -LiteralPath C:\New-WVDSessionHost.log "Installing FSLogix"
+If (!(Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* | where { $_.DisplayName -eq "Microsoft FSLogix Apps" }))
+    {
+    $fslogix_deploy_status = Start-Process `
+        -FilePath "$LocalWVDpath\FSLogix\x64\Release\FSLogixAppsSetup.exe" `
+        -ArgumentList "/install /quiet" `
+        -Wait `
+        -Passthru
+    Add-Content -LiteralPath C:\New-WVDSessionHost.log "FS Logix Install Complete"
+    }
+Else {
+    Add-Content -LiteralPath C:\New-WVDSessionHost.log "WVD Agent was already installed"
+    }
+
+
 #######################################
 #    FSLogix User Profile Settings    #
 #######################################
@@ -294,6 +276,15 @@ New-ItemProperty `
     -PropertyType "DWord" `
     -Value 0
 Pop-Location
+
+
+############################
+#    Clean temp folder     #
+############################
+Add-Content -LiteralPath C:\New-WVDSessionHost.log "Clean temp folder"
+cd C:\
+Remove-Item -Path $LocalWVDpath -Recurse
+Add-Content -LiteralPath C:\New-WVDSessionHost.log "Clean temp folder Complete"
 
 
 #############
