@@ -20,7 +20,7 @@
 ################################
 New-Item -Path C:\ -Name Optimize -ItemType Directory -ErrorAction SilentlyContinue
 $LocalPath = "C:\Optimize\"
-$WVDOptimizeURL = 'https://github.com/evdp88/wvd/tree/master/PowerShell/WVD_optimization_011421/archive/master.zip'
+$WVDOptimizeURL = 'https://github.com/evdp88/wvd/archive/opt_dev.zip'
 $WVDOptimizeInstaller = "WVD-optimize-tool_011421.zip"
 Invoke-WebRequest `
     -Uri $WVDOptimizeURL `
@@ -31,17 +31,17 @@ Invoke-WebRequest `
 #    Prep for WVD Optimize    #
 ###############################
 Expand-Archive `
-    -LiteralPath "C:\Optimize\WVD-optimize-tool_011421.zip" `
-    -DestinationPath "$Localpath" `
+    -LiteralPath "$LocalPath\WVD-optimize-tool_011421.zip" `
+    -DestinationPath "$LocalPath" `
     -Force `
     -Verbose
-Set-Location -Path C:\Optimize\wvd-WVD-optimize-tool_011421
+Set-Location -Path $LocalPath\wvd-opt_dev
 
 
 #################################
 #    Run WVD Optimize Script    #
 #################################
-New-Item -Path C:\Optimize\ -Name install.log -ItemType File -Force
+New-Item -Path $LocalPath -Name install.log -ItemType File -Force
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force -Verbose
-add-content c:\Optimize\install.log "Starting Optimizations"  
+add-content $LocalPath\install.log "Starting Optimizations"  
 .\Win10_VirtualDesktop_Optimize.ps1 -Restart -Verbose
