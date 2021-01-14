@@ -20,7 +20,7 @@
 ################################
 New-Item -Path C:\ -Name Optimize -ItemType Directory -ErrorAction SilentlyContinue
 $LocalPath = "C:\Optimize\"
-$WVDOptimizeURL = 'https://github.com/evdp88/wvd/archive/WVD-optimize-tool_011421.zip'
+$WVDOptimizeURL = 'https://github.com/evdp88/wvd/tree/master/PowerShell/WVD_optimization_011421/archive/master.zip'
 $WVDOptimizeInstaller = "WVD-optimize-tool_011421.zip"
 Invoke-WebRequest `
     -Uri $WVDOptimizeURL `
