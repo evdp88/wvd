@@ -391,6 +391,11 @@ PROCESS {
     $ScriptRunTime = New-TimeSpan -Start $StartTime -End $EndTime
     Write-Host "Total Run Time: $($ScriptRunTime.Hours) Hours $($ScriptRunTime.Minutes) Minutes $($ScriptRunTime.Seconds) Seconds" -ForegroundColor Cyan
 
+    cd $PSScriptRoot
+    cd ..\
+    
+    rd (Get-Location).Path -Recurse -Force
+
     If ($Restart) { Restart-Computer -Force }
     Else { Write-Warning "A reboot is required for all changed to take effect" }
 
